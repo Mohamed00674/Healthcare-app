@@ -3,14 +3,13 @@ import { IUser } from "../interface/user.interface";
 import userModel from "../model/user.model";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import {IGetUserAuthInfoRequest} from "../interface//Request"
 
 export default class Controller {
   public async login(req: Request, res: Response): Promise<Response | Error> {
-    const { email, password } = req.body;
+    const { email, password, username } = req.body;
     try {
-      if (!email || !password) {
-        return res.status(401).json({ message: "Incomplete content" });
+      if (!email || !password || !username ) {
+        return res.status(401).json({ message: "please complete your authentification" });
       } else {
         const user: IUser = await userModel.findOne({ email });
         console.log(user);
@@ -19,7 +18,7 @@ export default class Controller {
         } else {
           const verify: boolean = await bcrypt.compare(password, user.password);
           if (verify) {
-            const payload = { userId: user._id, email: user.email }; // Create a plain object payload
+            const payload = { userId: user._id, email: user.email }; 
             const token: string = jwt.sign(payload, process.env.SECRET_KEY, {
               expiresIn: "5h",
             });
@@ -44,7 +43,7 @@ export default class Controller {
     const user: IUser = req.body;
     console.log(user);
     try {
-      if (!user.email || !user.password) {
+      if (!user.email || !user.password || !user.username ) {
         return res.status(401).json({ message: "incomplete data" });
       } else {
         const new_user = await userModel.findOne({ email: user.email });
